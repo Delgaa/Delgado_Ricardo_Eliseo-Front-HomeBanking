@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+#root{
+    display: flex;
+    background-color: #032030;
+}
+h1, h2, h3, p, span, button, a, label, table{
+    font-family: "Montserrat", sans-serif;
+    color: white;
+}
+select{
+    color: black;
+}
+header{
+    background-color: #032030;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 0px;
+    height: 100dvh;
+    position: absolute;
+    z-index: 30;
+    opacity: 0;
+
+    transition: all .5s ease;
+}
+
+header>nav{
+    display: flex;
+    flex-direction: column;
+    padding-top: 5rem;
+    gap: 1rem;
+    width: 80%;
+}
+
+header button{
+    align-self: self-start;
+    margin: 0px 0px 10px 10px;
+}
+
+header a{
+    cursor: pointer;
+    position: relative;
+    transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition-duration: 400ms;
+    transition-property: color;
+}
+
+header a:focus,header a:hover {
+    color: #ff0000;
+}
+
+header a:focus:after,header a:hover:after {
+    width: 100%;
+    left: 0%;
+}
+
+header a:after {
+    content: "";
+    pointer-events: none;
+    bottom: -2px;
+    left: 50%;
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    background-color: #fff;
+    transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition-duration: 400ms;
+    transition-property: width, left;
+}
+
+#moostNav{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    opacity: 0.9;
+    z-index: 40;
+    margin: 16px;
+    position: absolute;
+    border: 1px solid #395886;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+header.isActive{
+    display: flex;
+    width: 175px;
+    opacity: 0.9;
+}
+@media (min-width: 768px) {
+    #moostNav{
+        display: none;
+    }
+
+    header{
+        display: flex;
+        position: static;
+        width: 250px;
+        padding-top: 5rem;
+        opacity: 10;
+    }
+
+    header.isActive{
+        display: flex;
+        position: static;
+        width: 250px;
+        padding-top: 5rem;
+        opacity: 10;
+    }
+}
