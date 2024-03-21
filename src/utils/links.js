@@ -6,7 +6,7 @@ import {faDollarSign} from "@fortawesome/free-solid-svg-icons"
 export const LINKS_NAV =[
     {
         name: "Accounts",
-        href: "/",
+        href: "/home",
         icon: faUserGroup
     },
     {

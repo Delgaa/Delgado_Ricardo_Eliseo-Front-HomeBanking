@@ -4,7 +4,7 @@ import {faInstagram, faFacebook, faTwitter} from '@fortawesome/free-brands-svg-i
 
 function Footer() {
   return (
-    <footer className=' h-[50px] flex items-center justify-around relative'>
+    <footer className=' h-[6vh] flex items-center justify-around relative'>
         <div id="copyright">
             <h2>
             &copy; 2024 - All rights reserved

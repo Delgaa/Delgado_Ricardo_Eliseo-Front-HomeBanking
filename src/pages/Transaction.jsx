@@ -1,114 +1,198 @@
-import axios from 'axios'
-import React, { useEffect, useState } from 'react'
-import OptionLoan from '../components/OptionLoan'
-import OptionAccount from '../components/OptionAccount'
-import  Input  from '../components/Input'
-import OptionPayment from '../components/OptionPayment'
-import { Link, useParams } from 'react-router-dom'
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import OptionAccount from '../components/OptionAccount';
+import { useDispatch, useSelector } from 'react-redux';
+import authActions from '../redux/actions/auth.actions';
+import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
-function Transaction() {
-    const [loans, setLoans] = useState([])
-    const [clients, setClient] = useState({})
-    const [loading, setLoading] = useState(false)
-    const [loanSelect, setLoanSelect] = useState("")
-    const [newLoan, setNewLoan] = useState({})
-/*     const {id} = useParams() */
+const Transaction = () => {
+    const [newTransaction, setNewTransaction] = useState({amount: '', detail: "", numberOrigin: "", numberDestination: ""})
+    const [tipoDestino, setTipoDestino] = useState("")
+    const user = useSelector(store => store.authReducer.user)
+    const token = localStorage.getItem('token')
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const {current} = authActions;
+    const {loggedIn, ...userData} = user
+    const LoggedIn = localStorage.getItem('loggedIn')
+    const [errorMessageOrigin, setErrorMessageOrigin] = useState('')
+    const [errorMessageDestination, setErrorMessageDestination] = useState('')
+    const [errorMessageAmount, setErrorMessageAmount] = useState('')
+    const [errorMessageDescription, setErrorMessageDescription] = useState('')
 
-    useEffect(()=>{
-    axios(`http://localhost:8080/api/clients/1`)
-        .then(res=> setClient(res.data))
-        .catch(err => console.log(err))
-    }, [])
-
-    useEffect(()=>{
-        setLoading(true)
-        axios('http://localhost:8080/api/loans/')
-            .then(res => setLoans(res.data))
-            .catch(err=> console.log(err))
-            .finally(()=> setLoading(false))
-    },[])
-
-    const handLeChange = (e=>{
-        setLoanSelect(e.target.value)
-    })
-    const handLeChangeNew = (e=>{
-        setNewLoan({...newLoan, [e.target.name]: e.target.value})
-    })
-
-    function handLeSubmit (e){
-        e.preventDefault()
-    
-    /*     axios.post(`http://localhost:8080/api/clients/${id}`, newLoan)
-        .then(res => alert("creada con exito"))
-        .catch(err => console.log(err))
-        setNewLoan({}) */
-
-        console.log(newLoan);
+    const handLeChangeTypeDestination = (e) => {
+        setTipoDestino(e.target.value)
     }
 
-    const amountLoan = loans.find(loan => loan.name == loanSelect)
+
+    useEffect(() => {
+        if (LoggedIn && token){
+            axios.get('/api/clients/current/accounts/', {
+                headers:{
+                    'Authorization': `Bearer ${token}`
+                }
+            }).then(res => {
+                dispatch(current(res.data))
+        })
+    }
+    }, [])
+
+    const handLeChange = (e) => {
+        setNewTransaction({...newTransaction, [e.target.name]: e.target.value})
+
+    }
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        axios.post('/api/transactions/', newTransaction, {
+            headers:{
+                'Authorization': `Bearer ${token}`
+            }
+        }).then(res => {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+            Toast.fire({
+                icon: "success",
+                title: "Transfer successfully"
+            });
+            navigate('/home')
+        })
+        .catch(err =>{
+            if (err.response.data === 'Number account origin is empty') {
+                setErrorMessageOrigin(err.response.data)
+            }
+
+            if(err.response.data === 'Number account destination is empty' || err.response.data === 'The account destination not exist'){
+                setErrorMessageDestination(err.response.data)
+            }
+
+            if (err.response.data === 'Amount is empty' || err.response.data === 'The available balance is insufficient') {
+                setErrorMessageAmount(err.response.data)
+            }
+
+            if(err.response.data === 'Description is empty'){
+                setErrorMessageDescription(err.response.data)
+            }
+
+
+        })
+    }
 
     return (
-        <main className='bg-[#395886] bg-[url(/12469780_Wavy_REst-01_Single-07_3-removebg-preview.png)] bg-no-repeat bg-bottom h-[92%] flex flex-col items-center gap-6 md:rounded-l-3xl'>
-            <img className='w-[75px] self-end pt-5 pr-5 md:absolute' src='/logo.png'  alt="logo-bank" />
-            <h1 className='text-3xl text-center py-6'>Apply for a loan</h1>
+        <main className='bg-[#395886] flex pb-5 flex-col items-center flex-1 md:rounded-l-3xl'>
+            <img className='w-[75px] self-end pt-5 pr-5 md:absolute' src='/logo.png' alt="logo-bank" />
+            <h1 className='text-3xl text-center py-6'>Make a transfer</h1>
+            <div className='border rounded-xl p-6 w-[90%] md:w-[70%] lg:w-[50%] opacity-95 bg-[#004d74] mb-5 flex justify-center'>
+                <form onSubmit={handleSubmit} className='flex flex-col gap-2 w-9/12'>
+                        <label htmlFor="tipoDestino" className='flex flex-col gap-2' onChange={handLeChangeTypeDestination}>Type of destination:
+                            <div className='flex gap-5'>
+                                <label className='flex gap-2'>
+                                <input 
+                                type="radio" name="tipoDestino" value="propio" />
+                                    Own
+                                </label>
 
-            {loading && <h2>Loading...</h2>}
-
-            <div className='border rounded-xl p-6 w-[90%] md:w-[70%] lg:w-[50%] opacity-90 bg-[#004d74] mb-5'>
-            <form className='flex flex-col items-center gap-2 w-full' onSubmit={handLeSubmit}>
-                <fieldset className='w-[75%]'>
-                    <label className='flex flex-col gap-1'>Select loan:
-                        <select className='rounded-xl py-1' onChange={handLeChange} onInput = {handLeChangeNew} required name = "name">
-                            <option value=''>Select loan</option>
+                                <label className='flex gap-2'>
+                                <input type="radio" name="tipoDestino" value="otros" />
+                                    Other
+                                </label>
+                            </div>
+                        </label>
+                    <div>
+                        <label className='flex flex-col gap-2'>Account Origin:
+                            <select className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-sky-700 dark:border-blue-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                            name='numberOrigin' 
+                            onChange={handLeChange}>
+                                <option value=''>Select account origin</option>
+                                {
+                                    Object.values(userData)?.map((account, index) => (
+                                        <option key={index} value={account.number}>{account.number}</option>
+                                    ))
+                                }
+                            </select>
                             {
-                                loans.map(loan => {return <OptionLoan key={loan.id} name={loan.name}/>})
-                            }
-                        </select>
-                    </label>
-                </fieldset>
-
-                <fieldset className='w-[75%]'>
-                    <label className='flex flex-col gap-1'>Source account
-                        <select className='rounded-xl py-1' required >
-                            <option value='' >Select account</option>
-                            {
-                                clients.accounts?.map(loan => {return <OptionAccount key={loan.id} number={loan.number}/>})
-                            }
-                        </select>
-                    </label>
-                </fieldset>
-
-                <fieldset className='w-[75%]'>
-                        <label className='flex flex-col gap-1' onInput={handLeChangeNew}>Source Amount
-                            {
-                                loanSelect != '' ? <Input amount={amountLoan?.maxAmount}/>:<p className= 'text-black rounded-xl py-1 bg-white'>Select loan first</p>
+                                errorMessageOrigin && <p className='text-red-400 font-medium'>{errorMessageOrigin}</p>
                             }
                         </label>
-                </fieldset>
-
-                <fieldset className='w-[75%]'>
-                    <label className='flex flex-col gap-1'>Payments
-                        <select className='rounded-xl py-1' required name = "payments" onChange={handLeChangeNew}>
-                            <option value=''>Select payments</option>
+                    </div>
+                    <div>
+                        <label className='flex flex-col gap-2'>Account Destination:
                             {
-                                loanSelect != '' && amountLoan?.payments.map(payment=>{return <OptionPayment key={payment} payments={payment}/>})
+                                (tipoDestino == 'propio') && (
+                                    <select className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-sky-700 dark:border-blue-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                                    name='numberDestination'
+                                    onChange={handLeChange}> 
+                                        <option value=''>Select account destination</option>
+                                        {
+                                            Object.values(userData)?.filter((account) => account.number != newTransaction.numberOrigin)
+                                                                .map((account2, index) => (<option key={index} value={account2.number}>{account2.number}</option>))
+                                        }
+                                    </select>
+                                )
                             }
-                        </select>
-                    </label>
-                </fieldset>
-                <label className='flex gap-2 text-xl text-center w-[70%]'> 
-                    <input type="checkbox" name="conditions" required/>
-                    Accept the terms and conditions
-                </label>
-                <div className='flex flex-wrap gap-6 justify-center w-full'>
-                    <button className=' p-2 bg-blue-500 rounded-lg' type="submit">Apply</button>
-                    <Link to='/loan'><button className=' p-2 bg-blue-500 rounded-lg'>Cancel</button></Link>
-                </div>
-            </form>
-            </div>
+                            {
+                                (tipoDestino == 'otros') && (
+                                    <input className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-sky-700 dark:border-blue-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                                    name='numberDestination' 
+                                    type="text" 
+                                    placeholder='VIN-12345678'
+                                    onChange={handLeChange}/>
+                                )
+                            }
+                            {
+                                (tipoDestino == '') && (
+                                    <p className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-sky-700 dark:border-blue-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                                    >Select option first</p>
+                                )
+                            }
+                            {
+                                errorMessageDestination && <p className='text-red-400 font-medium'>{errorMessageDestination}</p>
+                            }
+                        </label>
+                    </div>
+                    <div>
+                        <label className='flex flex-col gap-2'>Amount:
+                        <input className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-sky-700 dark:border-blue-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
+                        name='amount' 
+                        type="number" 
+                        onChange={handLeChange}
+                        min={'1'}
+                        placeholder='E.G. 1111'/>
+                        
+                        {
+                            errorMessageAmount && <p className='text-red-400 font-medium'>{errorMessageAmount}</p>
+                        }
+                        </label>
+                    </div>
+                    <div>
+                        <label className='flex flex-col gap-2'>Description:
+                        <input className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-sky-700 dark:border-blue-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500' 
+                        name='detail' 
+                        type="text" 
+                        onChange={handLeChange} 
+                        placeholder='E.G. Salary'/>
+                        {
+                            errorMessageDescription && <p className='text-red-400 font-medium'>{errorMessageDescription}</p>
+                        }
+                        </label>
+                    </div>
+                    <div className='flex gap-6 justify-center'>
+                        <button type='submit' className='bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded'>Transfer</button>
+                        <Link to ="/home"><button className='bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded' type="button" >Cancel</button></Link>
+                    </div>
+                </form>
+        </div>
         </main>
-    )
-}
+    );
+};
 
-export default Transaction
+export default Transaction;

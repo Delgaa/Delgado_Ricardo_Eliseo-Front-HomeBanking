@@ -5,56 +5,79 @@ import 'react-credit-cards-2/dist/es/styles-compiled.css'
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { useDispatch, useSelector} from 'react-redux';
+import authActions from '../redux/actions/auth.actions';
+import CardsType from '../components/CardsType';
 
 function Card() {
-  const [clients, setClient] = useState({});
   const [loading, setLoading] = useState(false)
+  const user = useSelector(store => store.authReducer.user)
 
-  useEffect(()=>{
+  const dispatch = useDispatch();
+  const {current} = authActions;
+
+
+
+  useEffect(() =>{
     setLoading(true)
-    axios('http://localhost:8080/api/clients/1')
-    .then(res => setClient(res.data))
-    .catch(err => console.log(err))
-    .finally(()=> setLoading(false))
-},[])
+    const token = localStorage.getItem('token')
+    const loggedIn = localStorage.getItem('loggedIn')
+
+    if(loggedIn && token){
+      axios.get('/api/clients/current', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }).then(res => {
+        dispatch(current(res.data))
+      }).finally(() => setLoading(false))
+    }
+  },[])
+
+  const cardCredit = user.cards?.filter(card => card.type.includes("CREDIT"))
+  const cardDebit = user.cards?.filter(card => card.type.includes("DEBIT"));
 
   return (
-    <main className='bg-[#395886] h-[92%] flex flex-col items-center gap-6 md:rounded-l-3xl'>
+    <main className='bg-[#395886] flex pb-5 flex-col flex-1 md:rounded-l-3xl'>
       <img className='w-[75px] self-end pt-5 pr-5 md:absolute' src='/logo.png'  alt="logo-bank" />
-      <h1 className='text-3xl text-center py-6'>Your cards:</h1>
-
+      {
+        user.cards?.length > 0 ? <h1 className='text-3xl text-center py-6'>Your cards:</h1> : <h1 className='text-3xl w-full text-center py-6'>You don't have cards</h1>
+      }
       {loading && <h2 className='text-xl py-6 '>Loading...</h2>}
 
-      <div className='flex flex-wrap justify-center gap-6 mb-12'>
-        <section className='flex flex-col'>
-          <h2 className='text-xl py-6 '>Credit:</h2>
+      <div className='flex flex-wrap justify-center gap-6'>
+        {
+          cardCredit?.length > 0 ? (<section className='flex flex-col gap-6'>
+          <h2 className='text-xl pt-6 '>Credit:</h2>
           {
-            clients.cards?.length > 0 ? clients.cards?.map(card=> {
-                return (
-                  card.type.includes("CREDIT") ? <Cards 
+            cardCredit?.map(card=> {
+                return ( <Cards 
                   key={card.id}
                   number={card.number.replaceAll("-", '')}
                   expiry={card.thruDate.replaceAll("-", '').slice(2, 6)}
                   cvc={card.cvv}
-                  name={card.cardHolder}/> : "")}): <h2 className='text-xl text-center py-6 w-[80%]'>Does not have associated credits cards</h2>
+                  name={card.cardHolder}/>)})
           }
-        </section>
-        <section className='flex flex-col'>
-        <h2 className='text-xl py-6 '>Debit:</h2>
-          {
-            clients.cards?.length > 0 ? clients.cards?.map(card=> {
-              return (
-                card.type.includes("DEBIT") ? <Cards 
-                key={card.id}
-                number={card.number.replaceAll("-", '')}
-                expiry={card.thruDate.replaceAll("-", '').slice(2, 6)}
-                cvc={card.cvv}
-                name={card.cardHolder}/> : "")}): <h2 className='text-xl text-center py-6 w-[80%]'>Does not have associated debits cards</h2>
-              }
-        </section>
+        </section>): null
+        }
+        {
+          cardDebit?.length > 0 ?(<section className='flex flex-col gap-6'>
+          <h2 className='text-xl pt-6 '>Debit:</h2>
+            {
+              cardDebit?.map(card=> {
+                return (
+                  card.type.includes("DEBIT") ? <Cards 
+                  key={card.id}
+                  number={card.number.replaceAll("-", '')}
+                  expiry={card.thruDate.replaceAll("-", '').slice(2, 6)}
+                  cvc={card.cvv}
+                  name={card.cardHolder}/> : "")})
+                }
+          </section>): null
+        }
         <div className='flex flex-col'>
-        <h2 className='text-xl py-6 text-center'>Request card:</h2>
-        <Link to={`/newCard/${clients.id}`} className='flex items-end'><button className=' w-[290px] h-[182px] py-3 px-4 flex items-center justify-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-900 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600'><FontAwesomeIcon icon={faPlus} /> Add Card</button></Link>
+          <h2 className='text-xl py-6 text-center'>Request card:</h2>
+          <Link to={`/newCard/${user.id}`} className='flex items-end'><button className=' w-[290px] h-[182px] py-3 px-4 flex items-center justify-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-900 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600'><FontAwesomeIcon icon={faPlus} /> Add Card</button></Link>
         </div>
       </div>
     </main>
