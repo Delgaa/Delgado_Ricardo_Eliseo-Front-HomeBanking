@@ -11,6 +11,7 @@ const withAuth = (Component) => {
         }
 
         const expiration = decodeJWT(token).exp;
+        
         if (expiration < Date.now() / 1000) {
             localStorage.removeItem('token');
             localStorage.removeItem('loggedIn');

@@ -33,10 +33,7 @@ const authReducer = createReducer(initialState, (builder) => {
         })
         .addCase(logout, (state, action) => {
             return {
-                ...state,
-                timestamps: null,
-                token: null,
-                loggedIn: false,
+                ...initialState
             }
         })
 })

@@ -1,7 +1,6 @@
 import { createAction } from "@reduxjs/toolkit";
 
 const current = createAction('CURRENT', (data) => {
-
     return {
         payload:{
             ...data,
@@ -10,7 +9,7 @@ const current = createAction('CURRENT', (data) => {
     }
 });
 
-const login = createAction('LOGIN ', (token) => {
+const login = createAction('LOGIN', (token) => {
     localStorage.setItem('token', token);
     localStorage.setItem('loggedIn', true);
     return {

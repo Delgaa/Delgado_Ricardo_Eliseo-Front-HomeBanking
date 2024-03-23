@@ -21,6 +21,10 @@ const SignUp = () => {
 
     const handleChange = (e) => {
             setNewClient({ ...newClient, [e.target.name]: e.target.value });
+            setErrorMessageEmail(null);
+            setErrorMessagePass(null);
+            setErrorMessageName(null);
+            setErrorMessageLastName(null);
     };
 
     const handleSubmit = (e) => {

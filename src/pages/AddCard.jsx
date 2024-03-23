@@ -12,6 +12,8 @@ function AddCard() {
 
   function handLeChange (e){
     setNewCard({...newCard, [e.target.name]: e.target.value})
+    setErrorMessageType(null)
+    setErrorMessageColor(null)
   }
 
   function handLeSubmit (e){

@@ -4,7 +4,7 @@ import OptionLoan from '../components/OptionLoan'
 import OptionAccount from '../components/OptionAccount'
 import  Input  from '../components/Input'
 import OptionPayment from '../components/OptionPayment'
-import { Link, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import Swal from 'sweetalert2'
 
 function AddLoan() {
@@ -20,9 +20,10 @@ function AddLoan() {
 
 
     const token = localStorage.getItem("token");
+    const loggedIn = localStorage.getItem("loggedIn");
 
     useEffect(()=>{
-        if (token) {
+        if (loggedIn && token) {
             axios('/api/clients/current', {
                 headers:{
                     Authorization: `Bearer ${token}`
@@ -35,7 +36,7 @@ function AddLoan() {
 
     useEffect(()=>{
         setLoading(true)
-        if (token) {
+        if (loggedIn && token) {
             axios('/api/loans/',{
                 headers:{
                     Authorization: `Bearer ${token}`
@@ -50,13 +51,18 @@ function AddLoan() {
     const handLeChange = (e=>{
         setLoanSelect(e.target.value)
     })
+
     const handLeChangeNew = (e=>{
         setNewLoan({...newLoan, [e.target.name]: e.target.value})
+        setErrorMessageName('')
+        setErrorMessagePayment('')
+        setErrorMessageAccount('')
+        setErrorMessageAmount('')
     })
 
     const handLeSubmit = (e) => {
         e.preventDefault()
-        if (token) {
+        if (loggedIn && token) {
             axios.post('/api/loans/', newLoan,{
             headers:{
                 Authorization: `Bearer ${token}`

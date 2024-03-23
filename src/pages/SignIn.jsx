@@ -41,6 +41,8 @@ const SignIn = () => {
 
     const handleDataChange = (e) => {
         setUserData({ ...userData, [e.target.name]: e.target.value });
+        setErrorMessageEmail(null);
+        setErrorMessagePass(null);
     }
 
     return (

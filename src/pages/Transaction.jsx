@@ -40,8 +40,12 @@ const Transaction = () => {
 
     const handLeChange = (e) => {
         setNewTransaction({...newTransaction, [e.target.name]: e.target.value})
-
-    }
+        setErrorMessageAmount('')
+        setErrorMessageDestination('')
+        setErrorMessageOrigin('')
+        setErrorMessageDescription('')
+        }
+        
     const handleSubmit = (e) => {
         e.preventDefault()
         axios.post('/api/transactions/', newTransaction, {
