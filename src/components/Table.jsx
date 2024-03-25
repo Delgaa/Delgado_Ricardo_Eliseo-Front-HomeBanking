@@ -9,7 +9,7 @@ function Table({transactions}) {
             <tr >
               <th className='text-center px-3 md:px-6 py-3'>Type</th>
               <th className='text-center px-3 md:px-6 py-3'>Amount</th>
-              <th className='text-center px-3 md:px-6 py-3'>Data</th>
+              <th className='text-center px-3 md:px-6 py-3'>Date</th>
               <th className='text-center px-3 md:px-6 py-3'>Description</th>
             </tr>
           </thead>
