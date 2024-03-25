@@ -52,8 +52,13 @@ function Loan() {
           </div>
           </Account>}): <h2 className='text-3xl text-white text-center py-6 w-[80%]'>Does not have loans</h2>
         }
+        {
+          user.loans?.length == 3 ? <h2 className='text-xl py-6 text-center w-full'>You have 3 loans, you can't ask for more</h2>
+          :(<div className='w-full flex justify-center'>
+          <Link to={`/newLoan/${user.id}`}><button className='py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-900 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600'><FontAwesomeIcon icon={faPlus}/>New loan</button></Link>
+          </div>)
+        }
         </div>
-        <Link to={`/newLoan/${user.id}`}><button className='py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-900 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600'><FontAwesomeIcon icon={faPlus}/>New loan</button></Link>
       </section>
     </main>
   )

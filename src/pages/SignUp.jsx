@@ -48,7 +48,7 @@ const SignUp = () => {
                 axios.post('/api/auth/login', {email, password})
                 .then(res => {
                     dispatch(login(res.data))
-                    setTimeout(navigate('/home'), 10000);
+                    setTimeout(() => navigate('/home'), 3000);
                 })
         }).catch( err => {
             if (err.response.data === 'Lastname has no content') {
